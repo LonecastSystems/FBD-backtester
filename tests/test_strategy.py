@@ -1,0 +1,18 @@
+import unittest
+from strategy import Strategy
+import pandas as pd
+
+class SampleStrategy(Strategy):
+    def try_bet(self, match: pd.Series, previous_matches: pd.DataFrame) -> float:
+        return 0
+
+class TestStrategy(unittest.TestCase):
+    def test_calculate_kelly_criterion(self):
+        sample = SampleStrategy(25.0)
+        bet = sample.calculate_kelly_criterion(1.6, 70)
+        
+        self.assertEqual(bet, 5.0)
+
+        bet = sample.calculate_kelly_criterion(1.9, 78)
+        
+        self.assertEqual(bet, 13.39)
