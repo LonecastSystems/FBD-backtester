@@ -40,16 +40,16 @@ class TestBacktester(unittest.TestCase):
 
         df = pd.DataFrame(data)
 
-        bt = Backtester([sample], df)
+        bt = Backtester([sample], 1000)
 
-        profit = bt.backtest(1000, 5)
+        profit = bt.backtest(df, 5)
 
         history = bt.history
 
         self.assertEqual(len(history), 6)
         self.assertNotEqual(profit, 0)
 
-        for h in history.items():
+        for h in history:
             print("\n", h)
 
         print(profit)
