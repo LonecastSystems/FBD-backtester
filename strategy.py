@@ -18,24 +18,18 @@ class Strategy(ABC):
     def try_bet(self, match: pd.Series, previous_matches: pd.DataFrame) -> float:
         return 0.0
     
-    def get_value_kc_bet(self, odd: float, probability: float) -> float:
-        bet = 0.0
+    def calculate_value(self, market_odd: float, probability: float) -> float:
+        if probability == 0:
+            return 0
         
-        if odd >= self.min_odds and probability >= self.min_probability:
-            multiplier = self.calculate_value(odd, probability) / 100
-            bet = self.calculate_kelly_criterion(odd, probability, multiplier)
+        odd = 1 / (probability / 100)
 
-        return bet
-    
-    def get_return(self, condition: bool, odd: float, probability: float) -> float:
-        bet = self.get_value_kc_bet(odd, probability)
+        if odd < market_odd:
+            value = ((market_odd / odd) - 1) * 100
 
-        potential = odd * bet
-        profit = potential - bet
-        if profit < self.min_profit:
-            return 0.0
+            return value
 
-        return potential if condition else -bet
+        return 0
 
     def calculate_kelly_criterion(self, odd: float, probability: float, multiplier: float = 1.0) -> float:
         b = odd - 1
@@ -51,15 +45,23 @@ class Strategy(ABC):
 
         return round(willing_to_risk*100) / 100
     
-    def calculate_value(self, market_odd: float, probability: float):
-        if probability == 0:
-            return 0
+    def calculate_value_kc_bet(self, odd: float, probability: float) -> float:
+        bet = 0.0
         
-        odd = 1 / (probability / 100)
+        if odd >= self.min_odds and probability >= self.min_probability:
+            multiplier = self.calculate_value(odd, probability) / 100
+            bet = self.calculate_kelly_criterion(odd, probability, multiplier)
 
-        if odd < market_odd:
-            value = ((market_odd / odd) - 1) * 100
+        return bet
+    
+    def calculate_value_kc_return(self, condition: bool, odd: float, probability: float) -> float:
+        bet = self.calculate_value_kc_bet(odd, probability)
+        return self.calculate_return(condition, odd, bet)
+    
+    def calculate_return(self, condition: bool, odd: float, bet: float) -> float:
+        potential = odd * bet
+        profit = potential - bet
+        if profit < self.min_profit:
+            return 0.0
 
-            return value
-
-        return 0
+        return potential if condition else -bet
