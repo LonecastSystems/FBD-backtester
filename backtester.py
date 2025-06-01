@@ -32,16 +32,16 @@ class Backtester:
             correct_bets = 0
 
             for strat in self.strats:
-                curr_profit = strat.try_bet(row, bt_df)
-                if curr_profit == 0:
-                    continue
-                else:
-                    num_bets += 1
-                    if curr_profit > 0:
-                        correct_bets += 1
+                for curr_profit in strat.try_bet(row, bt_df):
+                    if curr_profit == 0:
+                        continue
+                    else:
+                        num_bets += 1
+                        if curr_profit > 0:
+                            correct_bets += 1
 
-                bankroll += curr_profit
-                match_profit += curr_profit
+                    bankroll += curr_profit
+                    match_profit += curr_profit
 
             history.append({
                 "date": date,

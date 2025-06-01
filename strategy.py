@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 import pandas as pd
 
 class Strategy(ABC):
@@ -15,8 +16,8 @@ class Strategy(ABC):
         pass
 
     @abstractmethod
-    def try_bet(self, match: pd.Series, previous_matches: pd.DataFrame) -> float:
-        return 0.0
+    def try_bet(self, match: pd.Series, previous_matches: pd.DataFrame) -> List[float]:
+        return [0.0]
     
     def calculate_value(self, market_odd: float, probability: float) -> float:
         if probability == 0:

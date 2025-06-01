@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List
 import unittest
 import numpy as np
 import pandas as pd
@@ -6,7 +7,7 @@ from strategy import Strategy
 from backtester import Backtester
 
 class SampleStrategy(Strategy):
-    def try_bet(self, match: pd.Series, previous_matches: pd.DataFrame) -> float:
+    def try_bet(self, match: pd.Series, previous_matches: pd.DataFrame) -> List[float]:
         res = match['RES']
 
         h_column = f"BF EX H ODDS"
@@ -20,9 +21,9 @@ class SampleStrategy(Strategy):
         if h_odd < meanH:
             bet = self.calculate_kelly_criterion(h_odd, h_prob)
 
-            return bet if res == 'H' else -bet
+            return [bet] if res == 'H' else [-bet]
 
-        return 0
+        return [0]
 
 class TestBacktester(unittest.TestCase):
     def test_backtest(self):
