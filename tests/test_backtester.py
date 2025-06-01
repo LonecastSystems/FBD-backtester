@@ -40,13 +40,13 @@ class TestBacktester(unittest.TestCase):
 
         df = pd.DataFrame(data)
 
-        bt = Backtester([sample], 1000)
+        bt = Backtester([sample])
 
-        profit = bt.backtest(df, 5)
+        result, history = bt.backtest(df, 1000, today - timedelta(days=5), today)
 
-        history = bt.history
+        profit = result["profit"]
 
-        self.assertEqual(len(history), 6)
+        self.assertEqual(len(history), 5)
         self.assertNotEqual(profit, 0)
 
         for h in history:

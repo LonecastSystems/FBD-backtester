@@ -4,30 +4,32 @@ import pandas as pd
 import strategy
 
 class Backtester:
-    history = []
-    bankroll: float
     strats: List[strategy.Strategy]
 
-    def __init__(self, strats: List[strategy.Strategy], bankroll: float):
+    def __init__(self, strats: List[strategy.Strategy]):
         self.strats = strats
-        self.bankroll = bankroll
         pass
 
-    def backtest(self, df: pd.DataFrame, search_days_back: int) -> float:
-        days_back_from_now_str = (datetime.today() - timedelta(days=search_days_back)).strftime('%Y-%m-%d')
-        recent_matches = df.loc[(df['DATE'] > days_back_from_now_str)].copy()
+    def backtest(self, df: pd.DataFrame, bankroll: float, start_date: datetime, end_date: datetime = datetime.today()):
+        lower_bound = start_date.strftime('%Y-%m-%d')
+        upper_bound = end_date.strftime('%Y-%m-%d')
+        recent_matches = df.loc[(df['DATE'] > lower_bound) & (df['DATE'] <= upper_bound)].copy()
 
-        if len(recent_matches.index) == 0:
-            return 0
+        history = []
+        result = {
+            "bankroll": bankroll, 
+            "profit": 0.0,
+            "num_bets": 0,
+            "correct_bets": 0
+        }
         
-        profit = 0
         for i, row in recent_matches.iterrows():
             date = row['DATE']
             bt_df = df.loc[(df['DATE'] < date)].copy()
             
+            match_profit = 0
             num_bets = 0
             correct_bets = 0
-            match_profit = 0
 
             for strat in self.strats:
                 curr_profit = strat.try_bet(row, bt_df)
@@ -38,16 +40,20 @@ class Backtester:
                     if curr_profit > 0:
                         correct_bets += 1
 
-                self.bankroll += curr_profit
+                bankroll += curr_profit
                 match_profit += curr_profit
-                profit += curr_profit
 
-            self.history.append({
+            history.append({
                 "date": date,
-                "bankroll": self.bankroll,
+                "bankroll": bankroll,
+                "profit": match_profit,
                 "num_bets": num_bets,
-                "correct_bets": correct_bets,
-                "match_profit": match_profit
+                "correct_bets": correct_bets
             })
 
-        return profit
+            result["bankroll"] += match_profit
+            result["profit"] += match_profit
+            result["num_bets"] += num_bets
+            result["correct_bets"] += correct_bets
+
+        return result, history
