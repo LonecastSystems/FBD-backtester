@@ -17,3 +17,10 @@ class TestStrategy(unittest.TestCase):
         bet = sample.calculate_kelly_criterion(1.9, 78)
         
         self.assertEqual(bet, 13.39)
+
+    def test_calculate_value(self):
+        sample = SampleStrategy(25.0)
+        roi, value = sample.calculate_value(2.3, 50)
+        
+        self.assertEqual(roi, 15.00)
+        self.assertEqual(value, 3.75)
